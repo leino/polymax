@@ -84,7 +84,7 @@ namespace Polyroot
 
                 interval_length = Numerics::abs_float(max_x - min_x);
                 if(interval_length < epsilon)
-                    return x;
+                    break;
                 
             }
             
@@ -110,13 +110,23 @@ namespace Polyroot
 
                 interval_length = Numerics::abs_float(max_x - min_x);
                 if(interval_length < epsilon)
-                    return x;
+                    break;
                 
             }            
             
         }
 
-
+        // NOTE: the last thing we do is to bisect the x axis linearly in-between min_x and max_x:
+        float const mid_x = (min_x + max_x)/2.0f;        
+#if 1
+        float const slope_mid_x = evaluate(coefficients[degree-1], degree-1, mid_x);
+        float const mid_y = evaluate(coefficients[degree], degree, mid_x);
+        float const x = mid_x - mid_y/slope_mid_x;
+        return x;
+#else
+        return mid_x;
+#endif
+        
     }
     
     inline int
@@ -199,10 +209,10 @@ int main(int argc, char** argv)
     
     float roots[MAX_DEGREE][MAX_DEGREE] = {};
 
-    float const min_x = -10.0f;
+    float const min_x = -100.0f;
     float const max_x = +10.0f;
 
-    int const highest_degree = 7;
+    int const highest_degree = 5;
     assert(highest_degree <= MAX_DEGREE);
 
     // OPTIMIZE: computing a bit too much here
@@ -211,10 +221,8 @@ int main(int argc, char** argv)
     coefficients[highest_degree][1] = -1.032f;
     coefficients[highest_degree][2] = -3.012f;
     coefficients[highest_degree][3] = +2.012f;
-	coefficients[highest_degree][4] = -1.0123f;
-	coefficients[highest_degree][5] = -1.065f;
-	coefficients[highest_degree][6] = 1.230f;
-    coefficients[highest_degree][7] = 4.0030f;
+    coefficients[highest_degree][4] = +1.0123f;
+    coefficients[highest_degree][5] = +1.0f;
 
     // NOTE: compute all of the derivatives
     for(int degree = highest_degree-1; degree >= 0; degree--)
