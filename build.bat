@@ -17,25 +17,22 @@ REM == build configuration ====
 set build_type=%build_type_internal%
 set debug_level=1
 set debug_clear_level=0
-set shader_debug_level=1
 
 REM == defines ====
-set build_type_internal_def=/DVNECK_BUILD_TYPE_INTERNAL=%build_type_internal%
-set build_type_release_def=/DVNECK_BUILD_TYPE_RELEASE=%build_type_release%
-set build_type_def=/DVNECK_BUILD_TYPE=%build_type%
-set debug_clear_level_def=/DVNECK_DEBUG_CLEAR_LEVEL=%debug_clear_level%
-set debug_level_def=/DVNECK_DEBUG_LEVEL=%debug_level%
-set shader_debug_level_def=/DVNECK_SHADER_DEBUG_LEVEL=%shader_debug_level%
-set vneck_defs=^
+set build_type_internal_def=/DPOLYROOT_BUILD_TYPE_INTERNAL=%build_type_internal%
+set build_type_release_def=/DPOLYROOT_BUILD_TYPE_RELEASE=%build_type_release%
+set build_type_def=/DPOLYROOT_BUILD_TYPE=%build_type%
+set debug_clear_level_def=/DPOLYROOT_DEBUG_CLEAR_LEVEL=%debug_clear_level%
+set debug_level_def=/DPOLYROOT_DEBUG_LEVEL=%debug_level%
+set polyroot_defs=^
     %build_type_internal_def%^
     %build_type_release_def%^
     %build_type_def%^
     %debug_level_def%^
     %debug_clear_level_def%
 
-set vneck_test_defs=^
-    %vneck_defs%^
-    %shader_debug_level_def%
+set polyroot_test_defs=^
+    %polyroot_defs%
 
 REM === warnings ======
 REM this is disabled because potentially unsafe things are totally fine
@@ -88,106 +85,24 @@ call %vc_install_path%\"\vcvarsall.bat" %target_architecture%
 
 set debug_flag=/Z7
 
-REM NOTE: making unique string based on the current time
-for /f "skip=1" %%x in ('wmic os get localdatetime') do if not defined datetime set datetime=%%x
-set datetime=%datetime:~0,14%
-
-REM NOTE: building dll for code hotloading
-call cl^
-     %common_compiler_flags%^
-     %output_switches%^
-     %vneck_defs%^
-     %debug_flag%^
-     %source_path%\vneck.cpp^
-     /link^
-     %common_linker_flags%^
-     /dll^
-     /out:%builds_path%\hotloadable_build.dll^
-     /PDB:%builds_path%\hotloadable_%datetime%.pdb
-
-REM exit if compile failed
-if %ERRORLEVEL% gtr 0 (
-    exit /b %ERRORLEVEL%
-    )
-
 REM NOTE: check if executable is locked
 2>nul (
-  >>%builds_path%\vneck_test.exe (call )
+  >>%builds_path%\polyroot_test.exe (call )
 ) && (set exe_locked=0) || (set exe_locked=1)
 
-REM NOTE: we compile only if this is not a hotload, i.e. if exe is not locked
-if %exe_locked% == 0 (
 
-    call cl^
-         %vneck_test_defs%^
-         %common_compiler_flags%^
-         %output_switches%^
-         %debug_flag%^
-         %libs%^
-         %source_path%\vneck_test.cpp^
-         /link %common_linker_flags% /OUT:%builds_path%\vneck_test.exe
-
-    REM exit if compile failed
-    if %ERRORLEVEL% gtr 0 (
-        exit /b %ERRORLEVEL%
-    )
-
-)
-
-set fxc_flag_warnings_are_errors=/WX
-set fxc_flag_enable_debugging_information=/Zi
-set fxc_flag_disable_optimization=/Od
-REM TODO: only add shader debugging if %shader_debug_level% is > 0
-set common_fxc_flags=^
-    /nologo^
-    %fxc_flag_warnings_are_errors%^
-    %fxc_flag_enable_debugging_information%^
-    %fxc_flag_disable_optimization%
-    
-REM ship the shaders!
-REM TODO: timestamped PDBs?
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T vs_5_0 /E mountain_vertex_shader^
-     /Fo %builds_path%\mountain_vertex_shader.cso^
-     /Fd %builds_path%\mountain_vertex_shader.pdb
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T vs_5_0 /E debug_vertex_shader^
-     /Fo %builds_path%\debug_vertex_shader.cso^
-     /Fd %builds_path%\debug_vertex_shader.pdb
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T vs_5_0 /E grass_vertex_shader^
-     /Fo %builds_path%\grass_vertex_shader.cso^
-     /Fd %builds_path%\grass_vertex_shader.pdb
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T vs_5_0 /E grid_vertex_shader^
-     /Fo %builds_path%\grid_vertex_shader.cso^
-     /Fd %builds_path%\grid_vertex_shader.pdb
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T vs_5_0 /E solid_vertex_shader^
-     /Fo %builds_path%\solid_vertex_shader.cso^
-     /Fd %builds_path%\solid_vertex_shader.pdb
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T ps_5_0 /E pixel_shader^
-     /Fo %builds_path%\pixel_shader.cso^
-     /Fd %builds_path%\pixel_shader.pdb
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T ps_5_0 /E mountain_pixel_shader^
-     /Fo %builds_path%\mountain_pixel_shader.cso^
-     /Fd %builds_path%\mountain_pixel_shader.pdb
-
-call fxc %common_fxc_flags%^
-     %source_path%\shaders.hlsl /T ps_5_0 /E grass_pixel_shader^
-     /Fo %builds_path%\grass_pixel_shader.cso^
-     /Fd %builds_path%\grass_pixel_shader.pdb
+call cl^
+     %polyroot_test_defs%^
+     %common_compiler_flags%^
+     %output_switches%^
+     %debug_flag%^
+     %libs%^
+     %source_path%\polyroot_test.cpp^
+     /link^
+     %common_linker_flags%^
+     /OUT:%builds_path%\polyroot_test.exe
 
 REM exit if compile failed
 if %ERRORLEVEL% gtr 0 (
-    exit /b %ERRORLEVEL%
-    )
+   exit /b %ERRORLEVEL%
+)
