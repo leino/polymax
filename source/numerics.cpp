@@ -94,7 +94,7 @@ namespace Numerics
     }
 
     inline float
-    abs_float(float x)
+    abs(float x)
     {
         // TODO: intrinsic?
         if( x < 0.0f )

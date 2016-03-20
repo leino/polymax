@@ -73,7 +73,7 @@ namespace Polyroot
                     max_x = x;
                 }
 
-                interval_length = Numerics::abs_float(max_x - min_x);
+                interval_length = Numerics::abs(max_x - min_x);
                 if(interval_length < epsilon)
                     break;
                 
@@ -99,7 +99,7 @@ namespace Polyroot
                     max_x = x;
                 }
 
-                interval_length = Numerics::abs_float(max_x - min_x);
+                interval_length = Numerics::abs(max_x - min_x);
                 if(interval_length < epsilon)
                     break;
                 
