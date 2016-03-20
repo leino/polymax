@@ -5,16 +5,13 @@
 #include "integer.h"
 #include "numerics.cpp"
 #include "log.h"
-
-namespace Polyroot
-{
-    int const MAX_DEGREE = 7;
-}
+namespace Polyroot{ int const MAX_DEGREE = 7; }
 #include "polyroot.cpp"
 
-int main(int argc, char** argv)
+int
+main(int argument_count, char** arguments)
 {
-    argc; argv;
+    argument_count; arguments;
 
     using namespace Polyroot;
     
