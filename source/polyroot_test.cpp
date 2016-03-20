@@ -55,9 +55,8 @@ main(int argument_count, char** arguments)
             floating_point(evaluate(coefficients[highest_degree], highest_degree, root));
             newline();
         }
-
-        return EXIT_SUCCESS;        
+        
     }
     
-
+    return EXIT_SUCCESS;        
 }
