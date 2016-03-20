@@ -11,11 +11,6 @@
 (setq build-command (concat build-script-path " " source-path " " build-output-path))
 (setq run-command (concat "cd " execution-root-path " && " executable-path "&"))
 
-(setq test-executable-path (concat build-output-path "\\" "buffer_test.exe"))
-(setq test-build-script-path (concat project-root-path "build_tests.bat"))
-(setq test-build-command (concat test-build-script-path " " source-path " " build-output-path))
-(setq test-run-command (concat "cd " execution-root-path " && " test-executable-path "&"))
-
 ;; saves everything and recompiles
 (global-set-key (kbd "<f9>")
                 (lambda ()
@@ -41,20 +36,3 @@
 		(lambda ()
 		  (interactive)
 		  (shell-command run-command)))
-
-
-
-;; saves everything and recompiles the tests
-(global-set-key (kbd "<f12>")
-                (lambda ()
-                  (interactive)
-                  (setq compile-command test-build-command)
-                  (setq compilation-finish-functions nil)
-                  (save-some-buffers 1) ; save all buffers with changes
-                  (recompile)))
-
-;; executes the tests
-(global-set-key (kbd "<f8>")
-		(lambda ()
-		  (interactive)
-		  (shell-command test-run-command)))
