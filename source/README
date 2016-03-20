@@ -1,4 +1,4 @@
-Quickie polynomial root finder.
+Quickie polynomial root finder for polynomials with real-valued coefficients.
 
 Not especially well tested yet -- there are very few test cases and all of them are well conditioned at the moment of writing.
 
