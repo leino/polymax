@@ -107,9 +107,9 @@ namespace Polyroot
             
         }
 
-        // NOTE: the last thing we do is to bisect the x axis linearly in-between min_x and max_x:
         float const mid_x = (min_x + max_x)/2.0f;        
 #if 1
+        // NOTE: the last thing we do is to bisect the x axis linearly in-between min_x and max_x:        
         float const slope_mid_x = evaluate(coefficients[degree-1], degree-1, mid_x);
         float const mid_y = evaluate(coefficients[degree], degree, mid_x);
         float const x = mid_x - mid_y/slope_mid_x;

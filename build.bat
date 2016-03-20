@@ -3,8 +3,6 @@
 REM === constants =======
 set source_path=%1
 set builds_path=%2
-set build_type_internal=1
-set build_type_release=0
 
 REM === environment =======
 set vc_install_path="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC"
@@ -12,27 +10,6 @@ set vc_install_path="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC"
 REM === build target =======
 set target_architecture=x64
 
-
-REM == build configuration ====
-set build_type=%build_type_internal%
-set debug_level=1
-set debug_clear_level=0
-
-REM == defines ====
-set build_type_internal_def=/DPOLYROOT_BUILD_TYPE_INTERNAL=%build_type_internal%
-set build_type_release_def=/DPOLYROOT_BUILD_TYPE_RELEASE=%build_type_release%
-set build_type_def=/DPOLYROOT_BUILD_TYPE=%build_type%
-set debug_clear_level_def=/DPOLYROOT_DEBUG_CLEAR_LEVEL=%debug_clear_level%
-set debug_level_def=/DPOLYROOT_DEBUG_LEVEL=%debug_level%
-set polyroot_defs=^
-    %build_type_internal_def%^
-    %build_type_release_def%^
-    %build_type_def%^
-    %debug_level_def%^
-    %debug_clear_level_def%
-
-set polyroot_test_defs=^
-    %polyroot_defs%
 
 REM === warnings ======
 REM this is disabled because potentially unsafe things are totally fine
@@ -70,33 +47,18 @@ set output_switches=^
     /Fe%builds_path%\^
     /Fd%builds_path%\
     
-set libs=^
-    user32.lib^
-    winmm.lib^
-    d3d12.lib^
-    D3DCompiler.lib^
-    dxgi.lib
-
 REM make sure that the output direcotry exists
 IF NOT EXIST %builds_path% mkdir %builds_path%
 
-REM set the compiler environment variables for 64 bit builds
+REM set the compiler environment variables for amd64 architecture
 call %vc_install_path%\"\vcvarsall.bat" %target_architecture%
 
 set debug_flag=/Z7
 
-REM NOTE: check if executable is locked
-2>nul (
-  >>%builds_path%\polyroot_test.exe (call )
-) && (set exe_locked=0) || (set exe_locked=1)
-
-
 call cl^
-     %polyroot_test_defs%^
      %common_compiler_flags%^
      %output_switches%^
      %debug_flag%^
-     %libs%^
      %source_path%\polyroot_test.cpp^
      /link^
      %common_linker_flags%^
