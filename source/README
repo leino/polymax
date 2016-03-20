@@ -1,0 +1,5 @@
+Quickie polynomial root finder.
+
+Not especially well tested yet -- there are very few test cases and all of them are well conditioned at the moment of writing.
+
+I intend to use it for a very specific purpose soon, and just made this implementation quickly in order to get a good starting point for a more well-targeted implementation.
