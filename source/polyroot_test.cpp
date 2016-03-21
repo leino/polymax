@@ -112,6 +112,8 @@ main(int argument_count, char** arguments)
                 try_find_roots(min_x, max_x, coefficients[test_idx], highest_degree[test_idx], roots);
             using namespace Log;
 
+            int const num_ref_roots = num_reference_roots[test_idx];
+            
             for(int root_idx=0; root_idx < num_found_roots; root_idx++)
             {
                 unsigned_integer(root_idx);
@@ -120,7 +122,7 @@ main(int argument_count, char** arguments)
                 string("found root: ");
                 floating_point(found_root);
                 string(", reference root: ");
-                if(root_idx >= num_reference_roots[test_idx])
+                if(root_idx >= num_ref_roots)
                 {
                     string("???");
                 }
@@ -139,7 +141,13 @@ main(int argument_count, char** arguments)
                     );
                 newline();
             }
-        
+
+            string("# roots found: ");
+            unsigned_integer(num_found_roots);
+            string("/");
+            unsigned_integer(num_ref_roots);
+            newline();
+            
         }
 
         Log::newline();
