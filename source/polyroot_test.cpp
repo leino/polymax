@@ -29,7 +29,7 @@ main(int argument_count, char** arguments)
 
     using namespace Polyroot;
 
-    int const num_tests = 2;
+    int const num_tests = 3;
     float coefficients[num_tests][MAX_DEGREE][MAX_DEGREE] = {};
     float reference_roots[num_tests][MAX_DEGREE] = {};
     int num_reference_roots[num_tests] = {};
@@ -77,6 +77,29 @@ main(int argument_count, char** arguments)
         reference_roots[test_idx][1] = +0.2300240f;
         num_reference_roots[test_idx] = 2;        
     }
+
+    {
+        int const test_idx = 2;
+        int const degree = 4;
+        highest_degree[test_idx] = degree;
+        coefficients[test_idx][degree][0] = 0.0f;
+        coefficients[test_idx][degree][1] = 0.0f;
+        coefficients[test_idx][degree][2] = -1.023f;
+        coefficients[test_idx][degree][3] = 0.0f;
+        coefficients[test_idx][degree][4] = +23.007f;
+        
+        /*
+          NOTE: Reference data from inspecting graphs on Google:
+          NOTE: Polynomial for google:
+          0*​x^​0+​0*​x^​1-​1.023*​x^​2+​23.007*​x^​4
+         */
+        reference_roots[test_idx][0] = -0.2108666f;
+        reference_roots[test_idx][1] =  0.0000000f;
+        reference_roots[test_idx][2] = +0.2108666f;
+        num_reference_roots[test_idx] = 3;
+    }    
+    
+    // 
     
     for(uint test_idx=0; test_idx < num_tests; test_idx++)
     {
