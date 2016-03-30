@@ -124,6 +124,20 @@ namespace Numerics
             return +x;
         }
     }
+
+    inline int
+    abs(int x)
+    {
+        // TODO: intrinsic?
+        if( x < 0 )
+        {
+            return -x;
+        }
+        else
+        {
+            return +x;
+        }
+    }    
     
     inline float
     clamped_float(float min, float max, float x)
@@ -212,7 +226,7 @@ namespace Numerics
 
     // NOTE: using the "round down" convention
     inline float
-    remainder_float(float const modulus, float const x)
+    remainder(float const modulus, float const x)
     {
         assert(modulus > 0.0f);
 
@@ -227,7 +241,7 @@ namespace Numerics
 
     // NOTE: using the "round down" convention    
     inline int
-    remainder_int(int const modulus, int const x)
+    remainder(int const modulus, int const x)
     {
         assert(modulus > 0);
 
@@ -248,6 +262,17 @@ namespace Numerics
         return result;
     }
 
+    // NOTE: using the "round down" convention    
+    inline uint64
+    remainder(uint64 const modulus, uint64 const x)
+    {
+        assert(modulus > 0);
+        uint64 const result = x % modulus;
+        assert(result >= 0);
+        assert(result < modulus);
+        return result;
+    }    
+    
     inline float
     log_float(float const base, float const x)
     {

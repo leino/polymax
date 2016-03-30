@@ -8,7 +8,7 @@
 struct TestCase
 {
     int degree;
-    float coefficients[Polymax::MAX_DEGREE];
+    float coefficients[Polymax::MAX_DEGREE+1];
     float interval[2];
     float maximum_x;
     float maximum_y;
@@ -158,6 +158,18 @@ TestCase test_cases[] =
         +5.022308e8f,
         
     } 
-   
+
+    /*
+      -2.78619981
+      +1.38923550 *  x
+      -2.01507425 * x^2
+      -1.58375883 * x^3
+      +2.93501425 * x^4
+      -1.19036698 * x^5
+      +4.91635609 * x^6
+      -3.16007376 * x^7
+
+    */
+    
     
 };

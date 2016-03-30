@@ -263,12 +263,11 @@ namespace Polymax
         return num_roots;
     }
 
-
     void
     maximum(
         float const polynomial_coefficients[MAX_DEGREE],
         int const polynomial_degree,
-        float const interval[2],
+        float const x_min, float const x_max,
         float *const maximum_x,
         float *const maximum_y
         )
@@ -294,12 +293,9 @@ namespace Polymax
                     float(coefficient_idx+1)*derivative_coefficients[derivative_degree+1][coefficient_idx+1];
             }
         }
-
-        float const x_min = interval[0];
-        float const x_max = interval[1];
         
         int const num_found_roots =
-            try_find_roots(interval[0], interval[1], derivative_coefficients, polynomial_degree-1, roots);
+            try_find_roots(x_min, x_max, derivative_coefficients, polynomial_degree-1, roots);
 
         float const x_min_y = evaluate(polynomial_coefficients, polynomial_degree, x_min);
         float const x_max_y = evaluate(polynomial_coefficients, polynomial_degree, x_max);
@@ -326,6 +322,18 @@ namespace Polymax
             }
         }
         
+    }    
+
+    void
+    maximum(
+        float const polynomial_coefficients[MAX_DEGREE],
+        int const polynomial_degree,
+        float const interval[2],
+        float *const maximum_x,
+        float *const maximum_y
+        )
+    {
+        maximum(polynomial_coefficients, polynomial_degree, interval[0], interval[1], maximum_x, maximum_y);
     }    
     
 }
