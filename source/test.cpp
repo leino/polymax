@@ -135,16 +135,26 @@ run_automated_test_cases()
         float maximum_y;
         maximum(coefficients, degree, x_min, x_max, &maximum_x, &maximum_y);
 
+        bool very_bad = false;
+        
         float const ratio = maximum_y/reference_maximum_y;
+
+        if(ratio < 0.9f)
+        {
+
+            very_bad = true;
+            //   __debugbreak();
+                
+        }
+        
         if(ratio < worst_ratio)
         {
-            if(ratio < 0.8f)
-                __debugbreak();
             worst_ratio = ratio;
         }
         
-#define LOG_TEST_RESULTS 0
-#if LOG_TEST_RESULTS
+
+        bool const log = very_bad;
+        if(log)
         {
             using namespace Log;
             string("found maximum: ");
@@ -156,11 +166,14 @@ run_automated_test_cases()
             floating_point(reference_maximum_y);
             string(" at ");
             floating_point(reference_maximum_x);
+            newline();
+            string("ratio: ");
+            floating_point(ratio);
+            
 			newlines(2);
             
             
         }
-#endif
         
     }
 
