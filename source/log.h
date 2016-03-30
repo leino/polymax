@@ -44,6 +44,13 @@ namespace Log
     {
         string("\n");
     }
+
+    inline void newlines(int const n)
+    {
+        for(int i=0; i<n; ++i)
+            newline();
+    }
+    
     
     inline void floating_point(float const x)
     {

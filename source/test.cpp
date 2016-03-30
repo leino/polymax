@@ -27,47 +27,35 @@ main(int argument_count, char** arguments)
 
         TestCase const*const tc = &test_cases[test_idx];
 
-        {
-            using namespace Log;
-            string("Test ");
-            unsigned_integer(test_idx);
-            newline();
-            string("~~~~~~~~~~~~~~");
-            newline();
-        }
-        
-        {
+        using namespace Log;
+        string("Test ");
+        unsigned_integer(test_idx);
+        newline();
+        string("~~~~~~~~~~~~~~");
+        newline();
 
-            float maximum_x;
-            float maximum_y;
-            maximum(
-                tc->coefficients,
-                tc->degree,
-                tc->interval,
-                &maximum_x,
-                &maximum_y
-                );
+        float maximum_x;
+        float maximum_y;
+        maximum(
+            tc->coefficients,
+            tc->degree,
+            tc->interval,
+            &maximum_x,
+            &maximum_y
+            );
            
 
-            {
-
-                using namespace Log;
+        string("found maximum: ");
+        floating_point(maximum_y);
+        string(" at ");
+        floating_point(maximum_x);
+        string(", reference maximum: ");
+        floating_point(tc->maximum_y);
+        string(" at ");
+        floating_point(tc->maximum_x);
                 
-                string("found maximum: ");
-                floating_point(maximum_y);
-                string(" at ");
-                floating_point(maximum_x);
-                string(", reference maximum: ");
-                floating_point(tc->maximum_y);
-                string(" at ");
-                floating_point(tc->maximum_x);
-                
-                newline();
-            }
-            
-        }
+        newlines(2);
 
-        Log::newline();
     }
     
     return EXIT_SUCCESS;        
