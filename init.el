@@ -6,7 +6,7 @@
 (setq build-output-path (concat project-root-path "builds"))
 (setq source-path (concat project-root-path "source"))
 
-(setq executable-path (concat build-output-path "\\" "polyroot_test.exe"))
+(setq executable-path (concat build-output-path "\\" "test.exe"))
 (setq build-script-path (concat project-root-path "build.bat"))
 (setq build-command (concat build-script-path " " source-path " " build-output-path))
 (setq run-command (concat "cd " execution-root-path " && " executable-path "&"))

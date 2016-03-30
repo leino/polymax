@@ -59,10 +59,10 @@ call cl^
      %common_compiler_flags%^
      %output_switches%^
      %debug_flag%^
-     %source_path%\polyroot_test.cpp^
+     %source_path%\test.cpp^
      /link^
      %common_linker_flags%^
-     /OUT:%builds_path%\polyroot_test.exe
+     /OUT:%builds_path%\test.exe
 
 REM exit if compile failed
 if %ERRORLEVEL% gtr 0 (

@@ -49,7 +49,25 @@ namespace Numerics
         return powf(base, exponent);
     }
 
-
+    inline float
+    sign(float const x)
+    {
+        // TODO: intrinsic
+        if(x < 0.0f)
+        {
+            return -1.0f;
+        }
+        else if(x > 0.0f)
+        {
+            return +1.0f;
+        }
+        else
+        {
+            return 0.0f;
+        }
+        
+    }
+    
     inline float
     sqrt_float(float x)
     {
@@ -165,7 +183,7 @@ namespace Numerics
     }    
     
     inline float
-    max_float(float a, float b)
+    max(float a, float b)
     {
         // TODO: intrinsic?
         if(a > b)
