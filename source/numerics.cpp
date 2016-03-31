@@ -15,7 +15,7 @@ namespace Numerics
     }
     
     inline float
-    floor_float(float const x)
+    floor(float const x)
     {
         // TODO: intrinsic
         return floorf(x);
@@ -211,7 +211,7 @@ namespace Numerics
     }
 
     inline float
-    min_float(float a, float b)
+    min(float a, float b)
     {
         // TODO: intrinsic?
         if(a < b)
@@ -230,7 +230,7 @@ namespace Numerics
     {
         assert(modulus > 0.0f);
 
-        float const quotient = floor_float(x/modulus);
+        float const quotient = floor(x/modulus);
         float const result = x - quotient*modulus;
         
         assert(result >= 0.0f);

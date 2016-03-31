@@ -39,6 +39,29 @@ namespace Log
         assert( buffer[needed_buffer_size] == '\0' );
         string(buffer);
     }
+
+    inline void integer(int const n)
+    {
+        // We need a buffer size of ceil(log10(2^32))=10,
+        // plus one character for the sign, and one for zero termination
+        size_t const size = 10+1+1;
+        char buffer[size];
+        int needed_buffer_size = _snprintf(buffer, size, "%d", n);
+        if(needed_buffer_size > size)
+        {
+            string("warning: log_uint32 buffer size too small");
+            assert(false);
+            return;
+        }
+        else if(needed_buffer_size == size)
+        {
+            string("warning: log_uint32 buffer size too small to append a null terminator");
+            assert(false);            
+            return;
+        }
+        assert( buffer[needed_buffer_size] == '\0' );
+        string(buffer);
+    }    
     
     inline void newline()
     {

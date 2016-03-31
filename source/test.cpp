@@ -1,8 +1,3 @@
-// TODO:
-// Add more tests.
-// Add some tests with slightly less well-conditioned polynomials.
-
-
 #define _USE_MATH_DEFINES
 #include <math.h>
 #undef _USE_MATH_DEFINES
@@ -10,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "array.h"
 #include "integer.h"
 #include "raw_cast.cpp"
@@ -21,6 +17,7 @@ namespace Polymax{ int const MAX_DEGREE = 16; }
 #include "test_data.h"
 #include "prng.cpp"
 #include "prng_distribution.cpp"
+#include "bar_chart.cpp"
 
 int const NUM_AUTOMATED_TESTS = 1000000;
 
@@ -85,6 +82,15 @@ run_automated_test_cases()
       That is the test.
 
      */
+
+#define BUILD_BAR_CHART
+    
+#if defined(BUILD_BAR_CHART)
+    BarChart::Context ctx;
+    BarChart::Chart ch;
+    int counts[20];
+    BarChart::initialize(&ctx, &ch, 0.5f, 1.5f, ARRAY_LENGTH(counts), counts);
+#endif
     
     int const num_samples = 1000;
     
@@ -135,47 +141,51 @@ run_automated_test_cases()
         float maximum_y;
         maximum(coefficients, degree, x_min, x_max, &maximum_x, &maximum_y);
 
-        bool very_bad = false;
-        
         float const ratio = maximum_y/reference_maximum_y;
-
-        if(ratio < 0.9f)
-        {
-
-            very_bad = true;
-            //   __debugbreak();
-                
-        }
-        
         if(ratio < worst_ratio)
         {
             worst_ratio = ratio;
         }
-        
 
-        bool const log = very_bad;
-        if(log)
-        {
-            using namespace Log;
-            string("found maximum: ");
-            floating_point(maximum_y);
-            string(" at ");
-            floating_point(maximum_x);
-			newline();
-            string("reference maximum: ");
-            floating_point(reference_maximum_y);
-            string(" at ");
-            floating_point(reference_maximum_x);
-            newline();
-            string("ratio: ");
-            floating_point(ratio);
-            
-			newlines(2);
-            
-            
-        }
+        BarChart::record_entry(&ctx, &ch, ratio);        
         
     }
+
+#if defined(BUILD_BAR_CHART)
+
+    if(ch.num_low_outliers > 0)
+    {
+        using namespace Log;            
+        string("low outliers: ");
+        integer(ch.num_low_outliers);
+        newline();
+    }
+    for(int bin_idx = 0; bin_idx < ctx.num_bins; bin_idx++)
+    {
+        
+        using namespace Log;
+        int const count = ch.counts[bin_idx];
+        float ratio_lo;
+        float ratio_hi;
+        BarChart::bin_range(&ctx, bin_idx, &ratio_lo, &ratio_hi);
+        floating_point(ratio_lo);
+        string(" ... ");
+        floating_point(ratio_hi);
+        string(": ");
+        integer(count);
+        newline();
+        
+    }
+    if(ch.num_high_outliers > 0)
+    {
+        using namespace Log;            
+        string("high outliers: ");
+        integer(ch.num_high_outliers);
+        newline();
+    }
+    
+    
+#endif    
 
     return worst_ratio;
     
@@ -185,14 +195,8 @@ main(int argument_count, char** arguments)
 {
     argument_count; arguments;
 
-    run_manual_test_cases();
-
-    {
-        float const worst_ratio = run_automated_test_cases();
-        using namespace Log;
-        string("Automated tests worst ratio: ");
-        floating_point(worst_ratio);
-    }
+    // run_manual_test_cases();
+    run_automated_test_cases();
         
     return EXIT_SUCCESS;        
 }
