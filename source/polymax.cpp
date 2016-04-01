@@ -1,23 +1,11 @@
 /*
 
-  This is a very special purpose root finder.
+  This is a maximum finder specifically for finding the maxium of a real-valued polynomial.
 
-  The purpose is to apply it to the derivative of a polynomial with the final goal of finding a finite set of candidates
-  for minima/maxima inside the interval.
-
-  This root finder is concerned exlusively with finding out all x values inside a given interval, 
-  such that a polynomial is zero at those values.
-
-  Thanks to focusing on this one speficic use-case, certain simplifications in the implementation can been made.
-  One is that roots which may lay extremely close to the edges of the interval may be missed.
-  We don't care, since we will be including these boundaries as candidates when checking for minima/maxima anyway.
-  
-  Another simplification is that we don't care about distinguishing all the roots, for instance we don't care much
-  if we find only one out of two distinct roots which are extremely close together. 
-  If several roots are extremely close together and we found only one of them, the potential effect on the final minimum/maximum will be small, because
-  the missed candidate(s) would give very nearly the same result when evaluated.
-
-  For similar reasons, we also don't care to find out wether the zeros we do find are degenerate, or what their exact multiplicities may be.
+  Note that the root finder is not to be used as a general-purpose root finder.
+  It makes some simplifying assumptions that can only be made for the purposes of finding maxima of polynomials.
+  In particular, it may not find all roots, it is only "guaranteed" to find those roots which are relevant 
+  for maximizing the polynomial.
 
 */
 
@@ -131,17 +119,24 @@ namespace Polymax
             
         }
 
-        float const mid_x = (min_x + max_x)/2.0f;        
-#if 1
+        float const mid_x = (min_x + max_x)/2.0f;
+
+#define FINAL_BISECTION
+        
+#if defined(FINAL_BISECTION)
+        
         // NOTE: the last thing we do is to bisect the x axis linearly in-between min_x and max_x:        
         float const slope_mid_x = evaluate(coefficients[degree-1], degree-1, mid_x);
         float const mid_y = evaluate(coefficients[degree], degree, mid_x);
         float const x = mid_x - mid_y/slope_mid_x;
         return x;
-#else
-        return mid_x;
-#endif
         
+#else
+        
+        return mid_x;
+        
+#endif
+
     }
     
     inline int

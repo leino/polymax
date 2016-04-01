@@ -168,9 +168,9 @@ run_automated_test_cases()
         float ratio_lo;
         float ratio_hi;
         BarChart::bin_range(&ctx, bin_idx, &ratio_lo, &ratio_hi);
-        floating_point(ratio_lo);
+        floating_point_specific_precision(ratio_lo, 1, 2);
         string(" ... ");
-        floating_point(ratio_hi);
+        floating_point_specific_precision(ratio_hi, 1, 2);
         string(": ");
         integer(count);
         newline();

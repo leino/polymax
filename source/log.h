@@ -95,6 +95,31 @@ namespace Log
         string(buffer);
         
     }
+
+    // NOTE: num_digits_left and num_digits_right specify the number of digits to the left and right
+    // of the decomal point, respectively.
+    inline void floating_point_specific_precision(
+        float const x, int const num_digits_left = 1, int const num_digits_right = 8
+        )
+    {
+
+        // TODO: find out how long a floating point number can be when printed
+        // out as a string
+        size_t const size = 100;
+    
+        char buffer[size];
+        int needed_buffer_size = _snprintf(buffer, size, "%*.*f", num_digits_left, num_digits_right, x);
+        if(needed_buffer_size > size){
+            string("warning: log_float32 buffer size too small");
+            return;
+        }else if(needed_buffer_size == size){
+            string("warning: log_float32 buffer size too small to append a null terminator");
+            return;
+        }
+        assert( buffer[needed_buffer_size] == '\0' );
+        string(buffer);
+        
+    }    
     
     void tuple_float32_2(float x, float y)
     {
