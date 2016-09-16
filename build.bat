@@ -3,6 +3,7 @@
 REM === constants =======
 set source_path=%1
 set builds_path=%2
+set build_type=%3
 
 REM === environment =======
 set vc_install_path="C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC"
@@ -31,11 +32,8 @@ set disabled_warning_flags=^
 
 set common_compiler_flags=^
     /nologo^
-    /MT^
     /Gm-^
     /EHa-^
-    /Od^
-    /Oi^
     /WX^
     /W4^
     %disabled_warning_flags%
@@ -53,16 +51,37 @@ IF NOT EXIST %builds_path% mkdir %builds_path%
 REM set the compiler environment variables for amd64 architecture
 call %vc_install_path%\"\vcvarsall.bat" %target_architecture%
 
-set debug_flag=/Z7
+if %build_type% == debug (
+set runtime_library_flags=/MDd
+)
+if %build_type% == release (
+set runtime_library_flags=/MD
+)
+
+if %build_type% == debug (
+set debug_flags=/Zi
+)
+if %build_type% == release (
+set debug_flags=
+)
+
+if %build_type% == debug (
+set optimization_flags=/Od /Oi
+)
+if %build_type% == release (
+set optimization_flags=/O2 /Oi
+)
 
 call cl^
      %common_compiler_flags%^
+     %runtime_library_flags%^
      %output_switches%^
-     %debug_flag%^
+     %debug_flags%^
+     %optimization_flags%^
      %source_path%\test.cpp^
      /link^
      %common_linker_flags%^
-     /OUT:%builds_path%\test.exe
+     /OUT:%builds_path%\test_%build_type%.exe
 
 REM exit if compile failed
 if %ERRORLEVEL% gtr 0 (

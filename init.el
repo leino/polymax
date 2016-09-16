@@ -5,34 +5,39 @@
 (setq execution-root-path (concat project-root-path "builds"))
 (setq build-output-path (concat project-root-path "builds"))
 (setq source-path (concat project-root-path "source"))
-
-(setq executable-path (concat build-output-path "\\" "test.exe"))
 (setq build-script-path (concat project-root-path "build.bat"))
-(setq build-command (concat build-script-path " " source-path " " build-output-path))
-(setq run-command (concat "cd " execution-root-path " && " executable-path "&"))
 
-;; saves everything and recompiles
-(global-set-key (kbd "<f9>")
+(defun build-command (build-type)
+  (setq build-command (concat build-script-path " " source-path " " build-output-path " " build-type)))
+(defun run-command (build-type)
+  (concat "cd " execution-root-path " && " build-output-path "\\" "test_" build-type ".exe" "&"))
+
+;; saves everything and recompiles the debug build
+(global-set-key (kbd "<f1>")
                 (lambda ()
                   (interactive)
-                  (setq compile-command build-command)
+                  (setq compile-command (build-command "debug"))
                   (setq compilation-finish-functions nil)
                   (save-some-buffers 1) ; save all buffers with changes
                   (recompile)))
 
-;; saves, rebuilds and executes the program
-(global-set-key (kbd "<f10>")
-		(lambda ()
-		  (interactive)
-          (setq compile-command build-command)
-          (save-some-buffers 1) ; save all buffers with changes
-          (setq compilation-finish-functions '((lambda (a b)
-                                                 (interactive)
-                                                 (shell-command run-command))))
-          (recompile)))
+;; saves everything and recompiles the release build
+(global-set-key (kbd "<f2>")
+                (lambda ()
+                  (interactive)
+                  (setq compile-command (build-command "release"))
+                  (setq compilation-finish-functions nil)
+                  (save-some-buffers 1) ; save all buffers with changes
+                  (recompile)))
 
-;; executes the program
+;; executes the debug program
 (global-set-key (kbd "<f5>")
 		(lambda ()
 		  (interactive)
-		  (shell-command run-command)))
+		  (shell-command (run-command "debug"))))
+
+;; executes the release program
+(global-set-key (kbd "<f6>")
+		(lambda ()
+		  (interactive)
+		  (shell-command (run-command "release"))))
