@@ -34,7 +34,7 @@ namespace BarChart
         // NOTE: zero the counts
         memset(counts, 0, sizeof(int)*num_bins);        
         
-        assert(low < high);
+        ENSURE(low < high);
         ctx->low = low;
         ctx->high = high;
         ctx->num_bins = num_bins;
@@ -72,6 +72,29 @@ namespace BarChart
         float const t_high = float(bin_idx + 1)/float(ctx->num_bins);
         *low  = ctx->low + (ctx->high - ctx->low)*t_low;
         *high = ctx->low + (ctx->high - ctx->low)*t_high;
+    }
+
+    void
+    bin_limit_low(Context const*const ctx, int const bin_idx, float *const low)
+    {
+        // NOTE: just an unlerp on lo,hi with parameter bin_idx/num_bins
+        float const t = float(bin_idx + 0)/float(ctx->num_bins);
+        *low = float(   ctx->low + (ctx->high - ctx->low)*t   );
+    }    
+
+    void
+    bin_limit_high(Context const*const ctx, int const bin_idx, float *const high)
+    {
+        // NOTE: just an unlerp on hi,lo with parameter bin_idx/num_bins
+        float const t = float(bin_idx + 1)/float(ctx->num_bins);
+        *high = float(   ctx->low + (ctx->high - ctx->low)*t   );
+    }        
+    
+    int
+    bin_count(Chart const*const ch, int const bin_idx)
+    {
+        ENSURE(bin_idx >= 0);
+        return ch->counts[bin_idx];
     }
     
 }

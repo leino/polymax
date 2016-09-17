@@ -16,14 +16,14 @@ namespace Polymax
     inline bool
     safely_positive(float const epsilon, float const x)
     {
-        assert(epsilon > 0.0f);
+        ENSURE(epsilon > 0.0f);
         return x > +epsilon;
     }
 
     inline bool
     safely_negative(float const epsilon, float const x)
     {
-        assert(epsilon > 0.0f);
+        ENSURE(epsilon > 0.0f);
         return x < -epsilon;
     }
 
@@ -57,7 +57,7 @@ namespace Polymax
         int const degree
         )
     {
-        assert(degree > 0);
+        ENSURE(degree > 0);
         
 		float const epsilon = 1e-6f;
 
@@ -150,8 +150,8 @@ namespace Polymax
     {
         using namespace Numerics;
         
-        assert(min_x < max_x);
-        assert(highest_degree > 0);
+        ENSURE(min_x < max_x);
+        ENSURE(highest_degree > 0);
 
         int num_roots = 0;
         
@@ -236,10 +236,10 @@ namespace Polymax
                     // we use our isolated root finder.
 
                     float const root = isolated_root(lo_x, hi_x, coefficients, degree);
-                    assert(root >= min_x && root <= max_x);
-                    assert(root > lo_x && root < hi_x);
+                    ENSURE(root >= min_x && root <= max_x);
+                    ENSURE(root > lo_x && root < hi_x);
 
-                    assert(num_roots < MAX_DEGREE);
+                    ENSURE(num_roots < MAX_DEGREE);
                     roots[degree][num_roots] = root;
                     num_roots++;
 
@@ -271,8 +271,8 @@ namespace Polymax
         float derivative_coefficients[MAX_DEGREE][MAX_DEGREE] = {};
         float roots[MAX_DEGREE][MAX_DEGREE] = {};
 
-        assert(polynomial_degree <= MAX_DEGREE);
-        assert(polynomial_degree > 1);
+        ENSURE(polynomial_degree <= MAX_DEGREE);
+        ENSURE(polynomial_degree > 1);
 
         // TODO: get rid of this step, just compute the first derivative separately
         for(int coefficient_idx=0; coefficient_idx <= polynomial_degree; coefficient_idx++)

@@ -3,6 +3,8 @@
 
 #define LOG_OUTPUT (LOG_OUTPUT_STDOUT)
 
+#define LOG_EXPRESSION_FLOAT(expr) Log::string(#expr " = "); Log::floating_point(expr);
+
 namespace Log
 {
     
@@ -27,16 +29,16 @@ namespace Log
         if(needed_buffer_size > size)
         {
             string("warning: log_uint32 buffer size too small");
-            assert(false);
+            ENSURE(false);
             return;
         }
         else if(needed_buffer_size == size)
         {
             string("warning: log_uint32 buffer size too small to append a null terminator");
-            assert(false);            
+            ENSURE(false);            
             return;
         }
-        assert( buffer[needed_buffer_size] == '\0' );
+        ENSURE( buffer[needed_buffer_size] == '\0' );
         string(buffer);
     }
 
@@ -50,16 +52,16 @@ namespace Log
         if(needed_buffer_size > size)
         {
             string("warning: log_uint32 buffer size too small");
-            assert(false);
+            ENSURE(false);
             return;
         }
         else if(needed_buffer_size == size)
         {
             string("warning: log_uint32 buffer size too small to append a null terminator");
-            assert(false);            
+            ENSURE(false);            
             return;
         }
-        assert( buffer[needed_buffer_size] == '\0' );
+        ENSURE( buffer[needed_buffer_size] == '\0' );
         string(buffer);
     }    
     
@@ -73,6 +75,12 @@ namespace Log
         for(int i=0; i<n; ++i)
             newline();
     }
+
+    inline void spaces(int const n)
+    {
+        for(int i=0; i<n; ++i)
+            string(" ");
+    }    
     
     
     inline void floating_point(float const x)
@@ -83,7 +91,7 @@ namespace Log
         size_t const size = 100;
     
         char buffer[size];
-        int needed_buffer_size = _snprintf(buffer, size, "%f", x);
+        int needed_buffer_size = _snprintf(buffer, size, "%1.8e", x);
         if(needed_buffer_size > size){
             string("warning: log_float32 buffer size too small");
             return;
@@ -91,7 +99,7 @@ namespace Log
             string("warning: log_float32 buffer size too small to append a null terminator");
             return;
         }
-        assert( buffer[needed_buffer_size] == '\0' );
+        ENSURE( buffer[needed_buffer_size] == '\0' );
         string(buffer);
         
     }
@@ -116,10 +124,24 @@ namespace Log
             string("warning: log_float32 buffer size too small to append a null terminator");
             return;
         }
-        assert( buffer[needed_buffer_size] == '\0' );
+        ENSURE( buffer[needed_buffer_size] == '\0' );
         string(buffer);
         
     }    
+
+    // NOTE: num_digits_left and num_digits_right specify the number of digits to the left and right
+    // of the decomal point, respectively.
+    inline void
+        floating_point_specific_precision_sign(
+            float const x, int const num_digits_left = 1, int const num_digits_right = 8
+            )
+    {
+
+        if(x >= float(0))
+            string("+");
+        floating_point_specific_precision(x, num_digits_left, num_digits_right);
+        
+    }
     
     void tuple_float32_2(float x, float y)
     {

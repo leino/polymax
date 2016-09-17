@@ -22,6 +22,13 @@ namespace Numerics
     }
 
     inline float
+    ceiling(float const x)
+    {
+        // TODO: intrinsic
+        return ceilf(x);
+    }    
+    
+    inline float
     exp_float(float const x)
     {
         // TODO: intrinsic
@@ -96,7 +103,7 @@ namespace Numerics
     inline int
     clamped_int(int const min, int const max, int const x)
     {
-        assert( min <= max );
+        ENSURE( min <= max );
         if( x <= min )
         {
             return min;
@@ -228,13 +235,13 @@ namespace Numerics
     inline float
     remainder(float const modulus, float const x)
     {
-        assert(modulus > 0.0f);
+        ENSURE(modulus > 0.0f);
 
         float const quotient = floor(x/modulus);
         float const result = x - quotient*modulus;
         
-        assert(result >= 0.0f);
-        assert(result <= modulus);
+        ENSURE(result >= 0.0f);
+        ENSURE(result <= modulus);
         
         return result;
     }    
@@ -243,7 +250,7 @@ namespace Numerics
     inline int
     remainder(int const modulus, int const x)
     {
-        assert(modulus > 0);
+        ENSURE(modulus > 0);
 
         int result = -1;
         // TODO: intrinsic?
@@ -256,8 +263,8 @@ namespace Numerics
             result = modulus - ((-x) % modulus);
         }
 
-        assert(result >= 0);
-        assert(result < modulus);
+        ENSURE(result >= 0);
+        ENSURE(result < modulus);
     
         return result;
     }
@@ -266,10 +273,10 @@ namespace Numerics
     inline uint64
     remainder(uint64 const modulus, uint64 const x)
     {
-        assert(modulus > 0);
+        ENSURE(modulus > 0);
         uint64 const result = x % modulus;
-        assert(result >= 0);
-        assert(result < modulus);
+        ENSURE(result >= 0);
+        ENSURE(result < modulus);
         return result;
     }    
     
@@ -286,6 +293,13 @@ namespace Numerics
         return result;
     }
 
+    inline float
+    log10_float(float const x)
+    {
+        // TODO: special intrinsic for base 10?
+        return log10f(x);
+    }    
+    
     inline float
     square_float(float const x)
     {

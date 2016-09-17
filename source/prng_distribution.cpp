@@ -5,8 +5,8 @@ uniform_interval(uint64* seed, float a, float b)
     float const uint64_max_float = (float)UINT64_MAX;
     float const random_normalized = (float)(*seed)/uint64_max_float;
     float const random = Numerics::lerp_float(a, b, random_normalized);
-    assert(random >= a);
-    assert(random <= b);
+    ENSURE(random >= a);
+    ENSURE(random <= b);
     *seed = prng_step(*seed);
     return random;
 }
@@ -14,12 +14,12 @@ uniform_interval(uint64* seed, float a, float b)
 inline int
 uniform_range(uint64 *const seed, int const lo, int const hi)
 {
-    assert(lo <= hi);
+    ENSURE(lo <= hi);
 
     int const offset = Numerics::remainder(hi - lo + 1, Numerics::abs((int)*seed));
     int const sample = lo + offset;
-    assert(sample >= lo);
-    assert(sample <= hi);
+    ENSURE(sample >= lo);
+    ENSURE(sample <= hi);
     *seed = prng_step(*seed);
     return sample;
 }
