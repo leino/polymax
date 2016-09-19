@@ -72,10 +72,18 @@ if %build_type% == release (
 set optimization_flags=/O2 /Oi
 )
 
+if %build_type% == debug (
+set define_flags=/DENSURE_DEBUGBREAK_ON_ERROR
+)
+if %build_type% == release (
+set define_flags=
+)
+
 call cl^
      %common_compiler_flags%^
      %runtime_library_flags%^
      %output_switches%^
+     %define_flags%^
      %debug_flags%^
      %optimization_flags%^
      %source_path%\test.cpp^

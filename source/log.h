@@ -4,6 +4,7 @@
 #define LOG_OUTPUT (LOG_OUTPUT_STDOUT)
 
 #define LOG_EXPRESSION_FLOAT(expr) Log::string(#expr " = "); Log::floating_point(expr);
+#define LOG_EXPRESSION_UNSIGNED_INTEGER_64(expr) Log::string(#expr " = "); Log::unsigned_integer_64(expr);
 
 namespace Log
 {
@@ -17,15 +18,15 @@ namespace Log
         printf(message);
 #endif
     }
-
+    
     inline void
-    unsigned_integer(uint32 const n)
+    unsigned_integer_32(uint32 const n)
     {
-        // We need a buffer size of ceil(log10(2^32))=10,
-        // plus one character for the sign bit, and one for zero termination
-        size_t const size = 10+1+1;
+        size_t const size =
+            SerializationLimits::MAX_BASE_10_LENGTH_UNSIGNED_INTEGER_32 + 1;
+        
         char buffer[size];
-        int needed_buffer_size = _snprintf(buffer, size, "%d", n);
+        int needed_buffer_size = _snprintf(buffer, size, "%" PRIu32, n);
         if(needed_buffer_size > size)
         {
             string("warning: log_uint32 buffer size too small");
@@ -42,6 +43,34 @@ namespace Log
         string(buffer);
     }
 
+    inline void
+    unsigned_integer(uint const n)
+    {
+        unsigned_integer_32(n);
+    }
+    
+    inline void
+    unsigned_integer_64(uint64 const n)
+    {
+        size_t const size = SerializationLimits::MAX_BASE_10_LENGTH_UNSIGNED_INTEGER_64 + 1;
+        char buffer[size];
+        int needed_buffer_size = _snprintf(buffer, size, "%" PRIu64, n);
+        if(needed_buffer_size > size)
+        {
+            string("warning: log_uint32 buffer size too small");
+            ENSURE(false);
+            return;
+        }
+        else if(needed_buffer_size == size)
+        {
+            string("warning: log_uint32 buffer size too small to append a null terminator");
+            ENSURE(false);            
+            return;
+        }
+        ENSURE( buffer[needed_buffer_size] == '\0' );
+        string(buffer);
+    }    
+    
     inline void integer(int const n)
     {
         // We need a buffer size of ceil(log10(2^32))=10,

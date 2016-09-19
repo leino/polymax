@@ -5,21 +5,40 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "ensure.h"
 #include "array.h"
 #include "integer.h"
 #include "raw_cast.cpp"
 #include "constants.h"
 #include "numerics.cpp"
+#include "serialization_limits.h"
 #include "log.h"
 namespace Polymax{ int const MAX_DEGREE = 16; }
 #include "polymax.cpp"
-#include "test_data.h"
+#include "polymax_test_data.h"
 #include "prng.cpp"
 #include "prng_distribution.cpp"
 #include "bar_chart.cpp"
+#include "log_bar_chart.cpp"
 
 int const NUM_AUTOMATED_TESTS = 1000000;
+
+struct RandomTestParameters
+{
+    float min_coefficient;
+    float max_coefficient;
+};
+
+struct RandomTestCase
+{
+    uint64 seed;
+    float coefficients[Polymax::MAX_DEGREE];
+    float x_min;
+    float x_max;
+    int degree;
+};
 
 void
 run_manual_test_cases()
@@ -65,20 +84,6 @@ run_manual_test_cases()
     
 }
 
-struct RandomTestParameters
-{
-    float min_coefficient;
-    float max_coefficient;
-};
-
-struct RandomTestCase
-{
-    float coefficients[Polymax::MAX_DEGREE];
-    float x_min;
-    float x_max;
-    int degree;
-};
-
 void
 random_test_case(
     RandomTestParameters const*const parameters,
@@ -87,8 +92,7 @@ random_test_case(
     )
 {
 
-    memset(test_case, 0, sizeof(TestCase));
-    
+    test_case->seed = *seed;
     test_case->degree = uniform_range(seed, 2, 7);
     for(int coefficient_idx=0; coefficient_idx <= test_case->degree; coefficient_idx++)
     {
@@ -103,109 +107,16 @@ random_test_case(
     
 }
 
-namespace Log
-{
-    
-    using namespace BarChart;
-    
-    void
-    bar_chart(Chart const*const ch, Context const*const ctx)
-    {
-        ENSURE(ctx->high >= ctx->low);
-        
-        // NOTE: use appropriate number of significant digits to display the output in, so as to not
-        // clutter things up unneccessarily, yet still being able to distinguish bin limits
-        float const range = ctx->high - ctx->low;
-        float const bin_range = range/float(ctx->num_bins);
-        float const bin_range_exponent = Numerics::log10_float(bin_range);
-        int const num_displayed_significant_digits =
-            (int)Numerics::ceiling(Numerics::abs(bin_range_exponent));
-
-        int const num_displayed_decimals = bin_range_exponent < 0 ? num_displayed_significant_digits : 0;
-        // NOTE: num digits on left/right side of decimal point
-        int const num_digits_left = num_displayed_significant_digits - num_displayed_decimals;
-        int const num_digits_right = num_displayed_decimals;
-        
-        
-        if(ch->num_low_outliers > 0)
-        {
-            using namespace Log;
-
-            spaces(Numerics::max_int(1, num_digits_left) + num_digits_right + 2);
-            string(" ... ");
-            floating_point_specific_precision_sign(ctx->low, num_digits_left, num_digits_right);
-            string(": ");
-            integer(ch->num_low_outliers);
-            newline();
-        }
-
-        // NOTE: we want to summarize long runs of empty bins, so we are printing ranges of bins rather than
-        // individual bins (although a range can have length 1, of course)
-        int lo_bin_idx = 0;
-        while(lo_bin_idx < ctx->num_bins)
-        {
-
-            using namespace Log;
-
-
-            int count = ch->counts[lo_bin_idx];
-            int hi_bin_idx = lo_bin_idx+1;
-            if(count == 0)
-            {
-                while(hi_bin_idx < ctx->num_bins)
-                {
-                    if(ch->counts[hi_bin_idx] != 0)
-                    {
-                        break;
-                    }
-                    hi_bin_idx++;
-                }
-            }
-
-            float lo;
-            BarChart::bin_limit_low(ctx, lo_bin_idx, &lo);
-            float hi;
-            BarChart::bin_limit_high(ctx, hi_bin_idx-1, &hi);
-
-#if 0
-            string("[");
-            integer(lo_bin_idx);
-            string(", ");
-            integer(hi_bin_idx);
-            string(")");
-            string(" ");            
-#endif
-            
-
-            floating_point_specific_precision_sign(lo, num_digits_left, num_digits_right);
-            string(" ... ");
-            floating_point_specific_precision_sign(hi, num_digits_left, num_digits_right);
-            string(": ");
-            integer(count);
-            newline();
-
-
-            lo_bin_idx = hi_bin_idx;
-        }
-        if(ch->num_high_outliers > 0)
-        {
-            using namespace Log;
-            floating_point_specific_precision_sign(ctx->high, num_digits_left, num_digits_right);
-            string(" ... ");
-            spaces(Numerics::max_int(1, num_digits_left) + num_digits_right + 2);
-            string(": ");
-            
-            integer(ch->num_high_outliers);
-        }
-        
-    }
-
-};
-
 void
 run_automated_test_cases(uint64 *const seed)
 {
 
+    {
+        Log::string("test seed: ");
+        Log::unsigned_integer_64(*seed);
+        Log::newlines(2);
+    }
+    
     using namespace Polymax;
 
     enum Extreme
@@ -242,7 +153,7 @@ run_automated_test_cases(uint64 *const seed)
     float const maximum_difference = +0.0f;
     BarChart::initialize(&ctx, &ch, minimum_difference, maximum_difference, ARRAY_LENGTH(counts), counts);
     
-    int const num_samples = 10000;
+    int const num_samples = 1000;
     
     int const num_test_cases = NUM_AUTOMATED_TESTS;
     
@@ -259,7 +170,7 @@ run_automated_test_cases(uint64 *const seed)
         
     for(int test_case_idx=0; test_case_idx < num_test_cases; test_case_idx++)
     {
-
+        
         RandomTestCase test_case;
         random_test_case(&parameters, seed, &test_case);
         
@@ -297,7 +208,7 @@ run_automated_test_cases(uint64 *const seed)
 
         float const difference =
             (test_result.maximum_y - test_reference_result.maximum_y)/
-            Numerics::min(Numerics::abs(test_result.maximum_y), Numerics::abs(test_reference_result.maximum_y));
+            Numerics::max(Numerics::abs(test_result.maximum_y), Numerics::abs(test_reference_result.maximum_y));
         
         if(difference < extreme_difference[Extreme::Worst])
         {
@@ -321,9 +232,10 @@ run_automated_test_cases(uint64 *const seed)
         
     }
 
+    Log::string("overall relative difference distribution: ");
+    Log::newline();
     Log::bar_chart(&ch, &ctx);
-    Log::newlines(3);
-
+    Log::newline();
 
     {
         using namespace Log;
@@ -345,6 +257,9 @@ run_automated_test_cases(uint64 *const seed)
             newline();
             
             LOG_EXPRESSION_FLOAT(relative_difference);
+            newline();
+
+            LOG_EXPRESSION_UNSIGNED_INTEGER_64(test_case->seed);
             newline();
             
             string("polynomial = ");
@@ -370,7 +285,7 @@ run_automated_test_cases(uint64 *const seed)
             LOG_EXPRESSION_FLOAT(result->maximum_x); newline();
             LOG_EXPRESSION_FLOAT(result->maximum_y); newline();
 
-            newlines(2);
+            newline();
         }
         
     }
@@ -378,13 +293,11 @@ run_automated_test_cases(uint64 *const seed)
     
 }
 int
-main(int argument_count, char** arguments)
+main(int /*argument_count*/, char** /*arguments*/)
 {
-    argument_count; arguments;
-
     // run_manual_test_cases();
-    uint64 seed = 983274123412;
-    run_automated_test_cases(&seed);
+    
+    uint64 seed = 98332274319817232;
     run_automated_test_cases(&seed);
     run_automated_test_cases(&seed);
     run_automated_test_cases(&seed);
