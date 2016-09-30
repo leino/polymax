@@ -48,18 +48,16 @@ namespace Polymax
         }
         return y;
     }
-
-    // NOTE: Newton's method
+    
     inline float
     isolated_root(
         float min_x, float max_x,
         float const coefficients[MAX_DEGREE][MAX_DEGREE],
-        int const degree
+        int const degree,
+        float const epsilon = 1e-6f
         )
     {
         ENSURE(degree > 0);
-        
-		float const epsilon = 1e-6f;
 
         float const min_y = evaluate(coefficients[degree], degree, min_x);
         float const max_y = evaluate(coefficients[degree], degree, max_x);
@@ -84,6 +82,8 @@ namespace Polymax
                 {
                     max_x = x;
                 }
+
+				ENSURE(min_x <= max_x);
 
                 interval_length = Numerics::abs(max_x - min_x);
                 if(interval_length < epsilon)
@@ -111,6 +111,8 @@ namespace Polymax
                     max_x = x;
                 }
 
+				ENSURE(min_x <= max_x);
+
                 interval_length = Numerics::abs(max_x - min_x);
                 if(interval_length < epsilon)
                     break;
@@ -120,8 +122,12 @@ namespace Polymax
         }
 
         float const mid_x = (min_x + max_x)/2.0f;
+		ENSURE(mid_x >= min_x);
+		ENSURE(mid_x <= max_x);
 
-#define FINAL_BISECTION
+//#define FINAL_BISECTION
+
+
         
 #if defined(FINAL_BISECTION)
         
@@ -129,6 +135,10 @@ namespace Polymax
         float const slope_mid_x = evaluate(coefficients[degree-1], degree-1, mid_x);
         float const mid_y = evaluate(coefficients[degree], degree, mid_x);
         float const x = mid_x - mid_y/slope_mid_x;
+
+        // TODO: find out why these sometimes fail when we do the final bisection
+		ENSURE(x >= min_x);
+		ENSURE(x >= max_x);
         return x;
         
 #else
@@ -145,7 +155,9 @@ namespace Polymax
         float const max_x,
         float coefficients[MAX_DEGREE][MAX_DEGREE],
         int const highest_degree,
-        float roots[MAX_DEGREE][MAX_DEGREE]
+        float roots[MAX_DEGREE][MAX_DEGREE],
+        float const bracket_epsilon = 1e-10f,
+        float const isolated_root_finder_epsilon = 1e-6f
         )
     {
         using namespace Numerics;
@@ -174,8 +186,6 @@ namespace Polymax
         for(int degree = 2; degree <= highest_degree; degree++)
         {
 
-            float const epsilon = 1e-10f; // TODO: pass in
-
             // NOTE: All roots of derivative which are inside our interval.
             int const num_derivative_roots = num_roots;
 
@@ -184,15 +194,17 @@ namespace Polymax
             
             num_roots = 0;
 
+            // NOTE: our first bracket candidate is always the left limit of the interval
             float lo_x = min_x;
             float lo_y = evaluate(coefficients[degree], degree, lo_x);
 
+            // NOTE: skip candidates so long as the left bracket candidate is small
             int lo_idx = -1;
-            while(abs(lo_y) < epsilon)
+            while(abs(lo_y) < bracket_epsilon)
             {
                 lo_idx++;
                 if(lo_idx == num_internal_points)
-                    goto done;
+                    goto level_done;
                 lo_x = roots[degree-1][num_internal_points];
                 lo_y = evaluate(coefficients[degree], degree, lo_x);
             }
@@ -202,11 +214,12 @@ namespace Polymax
 
                 int hi_idx = lo_idx;
                 if(hi_idx == num_internal_points)
-                    goto done;
+                    goto level_done;
 
                 float hi_x;
                 float hi_y;
-                
+
+                // NOTE: search for the high limit, or if none can be found we skip to the next level
                 do
                 {                    
                     hi_idx++;
@@ -214,8 +227,8 @@ namespace Polymax
                     {
                         hi_x = max_x;
                         hi_y = evaluate(coefficients[degree], degree, hi_x);
-                        if(abs(hi_y) < epsilon)
-                            goto done;
+                        if(abs(hi_y) < bracket_epsilon)
+                            goto level_done;
                     }
                     else
                     {
@@ -223,19 +236,24 @@ namespace Polymax
                         hi_y = evaluate(coefficients[degree], degree, hi_x);
                     }
                 }
-                while(abs(hi_y) < epsilon);
-                
+                while(abs(hi_y) < bracket_epsilon);
+
+                // NOTE: We now know that our bracket does not take small values at it's limits:
+                ENSURE(abs(lo_y) >= bracket_epsilon);
+                ENSURE(abs(hi_y) >= bracket_epsilon);
+                // ... however, we still have to check if it actually contains a zero, by comparing a signs
                 if(
-                    (lo_y < -epsilon && hi_y > +epsilon) ||
-                    (lo_y > +epsilon && hi_y < -epsilon)
+                    (lo_y < float(0) && hi_y > float(0)) ||
+                    (lo_y > float(0) && hi_y < float(0))
                     )
                 {
                     // NOTE:
-                    // [lo_x, hi_x] brackets a zero. In fact it is an isolated zero because
+                    // The interval [lo_x, hi_x] brackets a zero, and does not take small values at it's limits.
+                    // In fact it is an isolated zero because
                     // the polynomial is monotonically increasing or decreasing on [x_lo, x_hi], so
                     // we use our isolated root finder.
 
-                    float const root = isolated_root(lo_x, hi_x, coefficients, degree);
+                    float const root = isolated_root(lo_x, hi_x, coefficients, degree, isolated_root_finder_epsilon);
                     ENSURE(root >= min_x && root <= max_x);
                     ENSURE(root > lo_x && root < hi_x);
 
@@ -245,13 +263,14 @@ namespace Polymax
 
                 }
 
+                // NOTE: low bracket limit for next root is just the high limit of the current bracket
                 lo_idx = hi_idx;
                 lo_x = hi_x;
                 lo_y = hi_y;
                 
             }
 
-        done:;
+        level_done:;
             
         }
         
@@ -288,9 +307,19 @@ namespace Polymax
                     float(coefficient_idx+1)*derivative_coefficients[derivative_degree+1][coefficient_idx+1];
             }
         }
-        
+
+        float const bracket_epsilon = 1e-10f;
+        float const isolated_root_finder_epsilon = 1e-6f;
         int const num_found_roots =
-            try_find_roots(x_min, x_max, derivative_coefficients, polynomial_degree-1, roots);
+            try_find_roots(
+                x_min,
+                x_max,
+                derivative_coefficients,
+                polynomial_degree-1,
+                roots,
+                bracket_epsilon,
+                isolated_root_finder_epsilon
+                );
 
         float const x_min_y = evaluate(polynomial_coefficients, polynomial_degree, x_min);
         float const x_max_y = evaluate(polynomial_coefficients, polynomial_degree, x_max);

@@ -86,7 +86,7 @@ call cl^
      %define_flags%^
      %debug_flags%^
      %optimization_flags%^
-     %source_path%\test.cpp^
+     %source_path%\analysis.cpp^
      /link^
      %common_linker_flags%^
      /OUT:%builds_path%\test_%build_type%.exe

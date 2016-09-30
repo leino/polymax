@@ -57,6 +57,13 @@ namespace Numerics
     }
 
     inline float
+    square(float const x)
+    {
+        // TODO: intrinsic
+        return powf(x, 2.0f);
+    }    
+    
+    inline float
     sign(float const x)
     {
         // TODO: intrinsic
@@ -132,6 +139,20 @@ namespace Numerics
         }
     }
 
+    inline double
+    abs(double x)
+    {
+        // TODO: intrinsic?
+        if( x < 0.0f )
+        {
+            return -x;
+        }
+        else
+        {
+            return +x;
+        }
+    }    
+    
     inline int
     abs(int x)
     {

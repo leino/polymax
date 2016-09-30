@@ -4,6 +4,7 @@
 #define LOG_OUTPUT (LOG_OUTPUT_STDOUT)
 
 #define LOG_EXPRESSION_FLOAT(expr) Log::string(#expr " = "); Log::floating_point(expr);
+#define LOG_EXPRESSION_UNSIGNED_INTEGER(expr) Log::string(#expr " = "); Log::unsigned_integer(expr);
 #define LOG_EXPRESSION_UNSIGNED_INTEGER_64(expr) Log::string(#expr " = "); Log::unsigned_integer_64(expr);
 
 namespace Log

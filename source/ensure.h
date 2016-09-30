@@ -5,3 +5,5 @@
 #endif
 
 #define ENSURE_EQUIVALENT(a, b) ENSURE((a) == (b));
+
+#define ENSURE_STATIC(expr) static_assert(expr, "failed to ensure static invariant");
